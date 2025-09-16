@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">recipes_test_app</string>
+    <string name="error_message">Ошибка при загрузке данных! Проверьте подключение к интернет и попробуйте еще раз.</string>
 </resources>
