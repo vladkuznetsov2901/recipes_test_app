@@ -1,4 +1,4 @@
-package com.example.recipes_test_app.presentation
+package com.example.recipes_test_app.presentation.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -22,31 +21,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
-import com.example.recipes_test_app.R
-import com.example.recipes_test_app.data.db.RecipeEntity
 import com.example.recipes_test_app.domain.models.Recipe
 import com.example.recipes_test_app.domain.models.Resource
 import com.example.recipes_test_app.presentation.viewmodels.MainViewModel
-import kotlinx.coroutines.flow.retry
-import okhttp3.internal.notifyAll
 
 
 @Composable
-fun RecipesScreen(viewModel: MainViewModel = hiltViewModel()) {
+fun RecipesScreen(onRecipeClick: (Int) -> Unit, viewModel: MainViewModel = hiltViewModel()) {
     val state by viewModel.recipesState
     val isLoadingMore by viewModel.isLoadingMore
 
@@ -72,7 +63,9 @@ fun RecipesScreen(viewModel: MainViewModel = hiltViewModel()) {
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(recipes.size) { index ->
-                    RecipeCard(recipes[index])
+                    RecipeCard(recipes[index]) {
+                        onRecipeClick(recipes[index].id)
+                    }
 
                     // Подгружаем новые элементы
                     if (index == recipes.size - 1) {
@@ -105,11 +98,13 @@ fun RecipesScreen(viewModel: MainViewModel = hiltViewModel()) {
 
 @Composable
 fun RecipeCard(
-    recipe: Recipe
+    recipe: Recipe,
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {

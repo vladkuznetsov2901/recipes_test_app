@@ -13,6 +13,6 @@ interface RecipesRepository {
 
     suspend fun insertRecipesCache(recipes: List<RecipeEntity>)
 
-
+    suspend fun getRecipeById(id: Int): Recipe
 
 }

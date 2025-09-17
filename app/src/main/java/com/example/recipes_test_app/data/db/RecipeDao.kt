@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.recipes_test_app.domain.models.Recipe
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -16,7 +17,12 @@ interface RecipeDao {
     @Query("SELECT * FROM recipes ORDER BY id ASC")
     fun getRecipesPaging(): PagingSource<Int, RecipeEntity>
 
-
     @Query("DELETE FROM recipes")
     suspend fun clearAll()
+
+    @Query("SELECT * FROM recipes WHERE id = :id")
+    suspend fun getRecipeById(id: Int): Recipe?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(recipe: RecipeEntity)
 }

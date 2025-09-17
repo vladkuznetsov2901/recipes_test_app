@@ -36,6 +36,18 @@ class RecipesRepositoryImpl @Inject constructor(
         recipeDao.insertAll(recipes)
     }
 
+    override suspend fun getRecipeById(id: Int): Recipe {
+        val local = recipeDao.getRecipeById(id)
+        if (local != null) {
+            return local
+        }
+
+        val remote = retrofit.getRecipeById(id)
+        recipeDao.insert(remote.toEntity())
+        return remote
+    }
+
+
     override suspend fun searchRecipes(): List<Recipe> {
         TODO("Not yet implemented")
     }

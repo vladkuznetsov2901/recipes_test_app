@@ -2,10 +2,12 @@ package com.example.recipes_test_app.data.api
 
 
 import com.example.recipes_test_app.data.data.RandomRecipesResponse
+import com.example.recipes_test_app.data.data.RecipeDTO
 import com.example.recipes_test_app.domain.models.Recipe
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface Api {
@@ -16,6 +18,13 @@ interface Api {
         @Query("includeNutrition") includeNutrition: Boolean = false,
         @Query("apiKey") apiKey: String = API_KEY3
     ): RandomRecipesResponse
+
+    @GET("recipes/{id}/information")
+    suspend fun getRecipeById(
+        @Path("id") id: Int,
+        @Query("includeNutrition") includeNutrition: Boolean = false,
+        @Query("apiKey") apiKey: String = API_KEY3
+    ): Recipe
 
     companion object {
         private const val API_KEY = "5f721c9bf6c149ca8e83c6c3b784e382"

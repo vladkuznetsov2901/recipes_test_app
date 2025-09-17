@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import javax.inject.Inject
 
-class GetRandomRecipesUseCase  @Inject constructor(private val recipesRepository: RecipesRepository) {
+class GetRandomRecipesUseCase @Inject constructor(private val recipesRepository: RecipesRepository) {
 
     suspend operator fun invoke(): List<Recipe> {
         return recipesRepository.getRandomRecipes()

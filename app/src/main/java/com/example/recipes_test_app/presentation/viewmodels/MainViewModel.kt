@@ -18,12 +18,14 @@ import androidx.compose.runtime.mutableStateOf
 import com.example.recipes_test_app.data.db.RecipeEntity
 import com.example.recipes_test_app.domain.usecases.GetCachedRecipesUseCase
 import com.example.recipes_test_app.domain.usecases.GetRandomRecipesUseCase
+import com.example.recipes_test_app.domain.usecases.GetRecipeByIdUseCase
 import com.example.recipes_test_app.domain.usecases.InsertRecipesCache
 import com.example.recipes_test_app.features.networkAvailabilityFlow
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.map
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val getRandomRecipesUseCase: GetRandomRecipesUseCase,
+    private val getRecipeByIdUseCase: GetRecipeByIdUseCase
 ) : ViewModel() {
 
     private val _recipesState = mutableStateOf<Resource<List<Recipe>>>(Resource.Loading())
@@ -41,6 +44,9 @@ class MainViewModel @Inject constructor(
     // Теперь это State
     private val _isLoadingMore = mutableStateOf(false)
     val isLoadingMore: State<Boolean> get() = _isLoadingMore
+
+    private val _uiState = MutableStateFlow<Resource<Recipe>>(Resource.Loading())
+    val uiState: StateFlow<Resource<Recipe>> = _uiState
 
 
     init {
@@ -61,6 +67,18 @@ class MainViewModel @Inject constructor(
                 _recipesState.value = Resource.Error(e.localizedMessage)
             } finally {
                 _isLoadingMore.value = false
+            }
+        }
+    }
+
+
+    fun loadRecipeById(id: Int) {
+        viewModelScope.launch {
+            try {
+                val recipe = getRecipeByIdUseCase(id)
+                _uiState.value = Resource.Success(recipe)
+            } catch (e: Exception) {
+                _uiState.value = Resource.Error("Нет соединения и данных нет в базе")
             }
         }
     }

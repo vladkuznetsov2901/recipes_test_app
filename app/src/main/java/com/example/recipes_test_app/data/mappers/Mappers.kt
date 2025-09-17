@@ -5,28 +5,53 @@ import com.example.recipes_test_app.data.db.RecipeEntity
 import com.example.recipes_test_app.domain.models.Recipe
 
 
+// DTO → Domain
 fun RecipeDTO.toDomain(): Recipe {
     return Recipe(
         id = id,
         title = title,
         imageUrl = image,
-        description = summary.replace(Regex("<.*?>"), "")
+        description = summary,
+        instructions = instructions,
+        readyInMinutes = readyInMinutes,
+        servings = servings
     )
 }
 
-// DTO -> Entity
 fun RecipeDTO.toEntity(): RecipeEntity {
     return RecipeEntity(
-        id = this.id,
-        title = this.title,
-        imageUrl = this.image,
-        description = this.summary.replace(Regex("<.*?>"), "")
+        id = id,
+        title = title,
+        imageUrl = image,
+        description = summary,
+        instructions = instructions,
+        readyInMinutes = readyInMinutes,
+        servings = servings
     )
 }
 
-fun RecipeEntity.toDomain(): Recipe = Recipe(
-    id = this.id,
-    title = this.title,
-    imageUrl = this.imageUrl,
-    description = this.description
-)
+// Domain → Entity
+fun Recipe.toEntity(): RecipeEntity {
+    return RecipeEntity(
+        id = id,
+        title = title,
+        imageUrl = imageUrl,
+        description = description,
+        instructions = instructions,
+        readyInMinutes = readyInMinutes,
+        servings = servings
+    )
+}
+
+// Entity → Domain
+fun RecipeEntity.toDomain(): Recipe {
+    return Recipe(
+        id = id,
+        title = title,
+        imageUrl = imageUrl,
+        description = description,
+        instructions = instructions,
+        readyInMinutes = readyInMinutes,
+        servings = servings
+    )
+}
