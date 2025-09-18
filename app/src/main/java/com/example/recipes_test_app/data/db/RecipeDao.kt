@@ -15,13 +15,13 @@ interface RecipeDao {
     suspend fun insertAll(recipes: List<RecipeEntity>)
 
     @Query("SELECT * FROM recipes ORDER BY id ASC")
-    fun getRecipesPaging(): PagingSource<Int, RecipeEntity>
+    suspend fun getCachedRecipes(): List<RecipeEntity>
 
     @Query("DELETE FROM recipes")
     suspend fun clearAll()
 
     @Query("SELECT * FROM recipes WHERE id = :id")
-    suspend fun getRecipeById(id: Int): Recipe?
+    suspend fun getRecipeById(id: Int): RecipeEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(recipe: RecipeEntity)

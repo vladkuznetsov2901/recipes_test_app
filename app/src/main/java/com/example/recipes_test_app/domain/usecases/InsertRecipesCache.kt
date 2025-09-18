@@ -9,9 +9,6 @@ import javax.inject.Inject
 
 class InsertRecipesCache @Inject constructor(private val recipesRepository: RecipesRepository) {
 
-    suspend operator fun invoke(recipes: List<RecipeEntity>) {
-
-        recipesRepository.insertRecipesCache(recipes)
-    }
+    suspend operator fun invoke(recipes: List<Recipe>) {}
 
 }

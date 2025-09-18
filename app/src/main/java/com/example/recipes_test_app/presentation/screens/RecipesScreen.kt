@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,30 +35,31 @@ import coil.compose.AsyncImage
 import com.example.recipes_test_app.domain.models.Recipe
 import com.example.recipes_test_app.domain.models.Resource
 import com.example.recipes_test_app.presentation.viewmodels.MainViewModel
+import kotlin.collections.emptyList
 
 
 @Composable
 fun RecipesScreen(onRecipeClick: (Int) -> Unit, viewModel: MainViewModel = hiltViewModel()) {
-    val state by viewModel.recipesState
-    val isLoadingMore by viewModel.isLoadingMore
+    val state = viewModel.recipesState.value
+    val recipes = (state as? Resource.Success)?.data ?: emptyList()
 
     when (state) {
-        is Resource.Loading -> Box(
-            Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
+        is Resource.Loading -> {
+            // Показываем загрузку только если список пуст
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
         }
 
-        is Resource.Error -> Box(
-            Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Ошибка: ${(state as Resource.Error).message}", color = Color.Red)
+        is Resource.Error -> {
+            // Показываем ошибку только если список пуст
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Ошибка: ${(state as Resource.Error).message}", color = Color.Red)
+            }
         }
 
         is Resource.Success -> {
-            val recipes = (state as Resource.Success).data
+            val recipes = state.data
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxSize()
@@ -67,16 +69,14 @@ fun RecipesScreen(onRecipeClick: (Int) -> Unit, viewModel: MainViewModel = hiltV
                         onRecipeClick(recipes[index].id)
                     }
 
-                    // Подгружаем новые элементы
-                    if (index == recipes.size - 1) {
+                    if (index == recipes.lastIndex && !viewModel.isLoadingMore.value) {
                         LaunchedEffect(Unit) {
                             viewModel.loadMoreRecipes()
                         }
                     }
                 }
 
-                // Индикатор снизу
-                if (isLoadingMore) {
+                if (viewModel.isLoadingMore.value) {
                     item {
                         Box(
                             modifier = Modifier
@@ -89,6 +89,7 @@ fun RecipesScreen(onRecipeClick: (Int) -> Unit, viewModel: MainViewModel = hiltV
                     }
                 }
             }
+
         }
     }
 }

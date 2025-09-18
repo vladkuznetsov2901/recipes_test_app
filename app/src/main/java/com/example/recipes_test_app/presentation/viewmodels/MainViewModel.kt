@@ -1,6 +1,7 @@
 package com.example.recipes_test_app.presentation.viewmodels
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -20,7 +21,6 @@ import com.example.recipes_test_app.domain.usecases.GetCachedRecipesUseCase
 import com.example.recipes_test_app.domain.usecases.GetRandomRecipesUseCase
 import com.example.recipes_test_app.domain.usecases.GetRecipeByIdUseCase
 import com.example.recipes_test_app.domain.usecases.InsertRecipesCache
-import com.example.recipes_test_app.features.networkAvailabilityFlow
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -41,7 +41,6 @@ class MainViewModel @Inject constructor(
 
     private val currentRecipes = mutableListOf<Recipe>()
 
-    // Теперь это State
     private val _isLoadingMore = mutableStateOf(false)
     val isLoadingMore: State<Boolean> get() = _isLoadingMore
 
@@ -53,23 +52,30 @@ class MainViewModel @Inject constructor(
         loadMoreRecipes()
     }
 
+
+
     fun loadMoreRecipes() {
         if (_isLoadingMore.value) return
 
         _isLoadingMore.value = true
 
         viewModelScope.launch {
-            try {
-                val newRecipes = getRandomRecipesUseCase()
-                currentRecipes.addAll(newRecipes)
-                _recipesState.value = Resource.Success(currentRecipes.toList())
-            } catch (e: Exception) {
-                _recipesState.value = Resource.Error(e.localizedMessage)
-            } finally {
-                _isLoadingMore.value = false
+            getRandomRecipesUseCase().collect { newRecipes ->
+                try {
+                    val uniqueNew = newRecipes.filter { new ->
+                        currentRecipes.none { it.id == new.id }
+                    }
+                    currentRecipes.addAll(uniqueNew)
+                    _recipesState.value = Resource.Success(currentRecipes.toList())
+                } catch (e: Exception) {
+                    _recipesState.value = Resource.Error(e.localizedMessage)
+                } finally {
+                    _isLoadingMore.value = false
+                }
             }
         }
     }
+
 
 
     fun loadRecipeById(id: Int) {
@@ -79,6 +85,7 @@ class MainViewModel @Inject constructor(
                 _uiState.value = Resource.Success(recipe)
             } catch (e: Exception) {
                 _uiState.value = Resource.Error("Нет соединения и данных нет в базе")
+                Log.d("loadRecipeById", "loadRecipeById: ${e.message}")
             }
         }
     }

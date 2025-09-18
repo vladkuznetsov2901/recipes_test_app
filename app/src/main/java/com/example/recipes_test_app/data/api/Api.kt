@@ -16,15 +16,15 @@ interface Api {
     suspend fun getRandomRecipes(
         @Query("number") number: Int = 10,
         @Query("includeNutrition") includeNutrition: Boolean = false,
-        @Query("apiKey") apiKey: String = API_KEY3
+        @Query("apiKey") apiKey: String = API_KEY
     ): RandomRecipesResponse
 
     @GET("recipes/{id}/information")
     suspend fun getRecipeById(
         @Path("id") id: Int,
         @Query("includeNutrition") includeNutrition: Boolean = false,
-        @Query("apiKey") apiKey: String = API_KEY3
-    ): Recipe
+        @Query("apiKey") apiKey: String = API_KEY2
+    ): RecipeDTO
 
     companion object {
         private const val API_KEY = "5f721c9bf6c149ca8e83c6c3b784e382"

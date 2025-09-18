@@ -19,7 +19,7 @@ data class RecipeDTO(
     val glutenFree: Boolean,
     val healthScore: Double,
     val id: Int,
-    val image: String,
+    val image: String?,
     val imageType: String,
     val instructions: String,
     val license: Any,
