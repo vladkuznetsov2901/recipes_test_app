@@ -3,6 +3,7 @@ package com.example.recipes_test_app.data.api
 
 import com.example.recipes_test_app.data.data.RandomRecipesResponse
 import com.example.recipes_test_app.data.data.RecipeDTO
+import com.example.recipes_test_app.data.data.SearchResponse
 import com.example.recipes_test_app.domain.models.Recipe
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -25,6 +26,12 @@ interface Api {
         @Query("includeNutrition") includeNutrition: Boolean = false,
         @Query("apiKey") apiKey: String = API_KEY2
     ): RecipeDTO
+
+    @GET("recipes/complexSearch")
+    suspend fun searchRecipes(
+        @Query("query") query: String,
+        @Query("number") number: Int = 10
+    ): SearchResponse
 
     companion object {
         private const val API_KEY = "5f721c9bf6c149ca8e83c6c3b784e382"

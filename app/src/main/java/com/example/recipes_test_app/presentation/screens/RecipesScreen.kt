@@ -19,10 +19,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,55 +45,95 @@ import kotlin.collections.emptyList
 @Composable
 fun RecipesScreen(onRecipeClick: (Int) -> Unit, viewModel: MainViewModel = hiltViewModel()) {
     val state = viewModel.recipesState.value
-    val recipes = (state as? Resource.Success)?.data ?: emptyList()
+    val searchState = viewModel.searchState.value
+    var searchQuery by remember { mutableStateOf("") }
 
-    when (state) {
-        is Resource.Loading -> {
-            // Показываем загрузку только если список пуст
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
 
-        is Resource.Error -> {
-            // Показываем ошибку только если список пуст
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Ошибка: ${(state as Resource.Error).message}", color = Color.Red)
-            }
-        }
-
-        is Resource.Success -> {
-            val recipes = state.data
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(recipes.size) { index ->
-                    RecipeCard(recipes[index]) {
-                        onRecipeClick(recipes[index].id)
-                    }
-
-                    if (index == recipes.lastIndex && !viewModel.isLoadingMore.value) {
-                        LaunchedEffect(Unit) {
-                            viewModel.loadMoreRecipes()
-                        }
-                    }
+    Column(Modifier.fillMaxSize()) {
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = {
+                searchQuery = it
+                if (it.isNotBlank()) {
+                    viewModel.searchRecipes(it)
                 }
+            },
+            label = { Text("Поиск рецептов") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        )
 
-                if (viewModel.isLoadingMore.value) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
+        if (searchQuery.isNotBlank()) {
+            when (searchState) {
+                is Resource.Loading -> Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) { CircularProgressIndicator() }
+
+                is Resource.Error -> Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) { Text("Ошибка: ${searchState.message}", color = Color.Red) }
+
+                is Resource.Success -> {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(searchState.data.size) { index ->
+                            RecipeCard(searchState.data[index]) {
+                                onRecipeClick(searchState.data[index].id)
+                            }
                         }
                     }
                 }
             }
+        } else {
+            when (state) {
+                is Resource.Loading -> Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) { CircularProgressIndicator() }
 
+                is Resource.Error -> Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) { Text("Ошибка: ${state.message}", color = Color.Red) }
+
+                is Resource.Success -> {
+                    val recipes = state.data
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(recipes.size) { index ->
+                            RecipeCard(recipes[index]) {
+                                onRecipeClick(recipes[index].id)
+                            }
+
+                            if (index == recipes.lastIndex && !viewModel.isLoadingMore.value) {
+                                LaunchedEffect(Unit) {
+                                    viewModel.loadMoreRecipes()
+                                }
+                            }
+                        }
+
+                        if (viewModel.isLoadingMore.value) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -21,6 +21,7 @@ import com.example.recipes_test_app.domain.usecases.GetCachedRecipesUseCase
 import com.example.recipes_test_app.domain.usecases.GetRandomRecipesUseCase
 import com.example.recipes_test_app.domain.usecases.GetRecipeByIdUseCase
 import com.example.recipes_test_app.domain.usecases.InsertRecipesCache
+import com.example.recipes_test_app.domain.usecases.SearchRecipesUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -33,7 +34,8 @@ import kotlinx.coroutines.flow.map
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val getRandomRecipesUseCase: GetRandomRecipesUseCase,
-    private val getRecipeByIdUseCase: GetRecipeByIdUseCase
+    private val getRecipeByIdUseCase: GetRecipeByIdUseCase,
+    private val searchRecipesUseCase: SearchRecipesUseCase
 ) : ViewModel() {
 
     private val _recipesState = mutableStateOf<Resource<List<Recipe>>>(Resource.Loading())
@@ -46,6 +48,9 @@ class MainViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<Resource<Recipe>>(Resource.Loading())
     val uiState: StateFlow<Resource<Recipe>> = _uiState
+
+    private val _searchState = mutableStateOf<Resource<List<Recipe>>>(Resource.Loading())
+    val searchState: State<Resource<List<Recipe>>> get() = _searchState
 
 
     init {
@@ -86,6 +91,18 @@ class MainViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = Resource.Error("Нет соединения и данных нет в базе")
                 Log.d("loadRecipeById", "loadRecipeById: ${e.message}")
+            }
+        }
+    }
+
+    fun searchRecipes(query: String) {
+        viewModelScope.launch {
+            _searchState.value = Resource.Loading()
+            try {
+                val results = searchRecipesUseCase(query)
+                _searchState.value = Resource.Success(results)
+            } catch (e: Exception) {
+                _searchState.value = Resource.Error(e.localizedMessage)
             }
         }
     }
