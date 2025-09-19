@@ -13,13 +13,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,14 +34,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.recipes_test_app.R
 import com.example.recipes_test_app.domain.models.Recipe
 import com.example.recipes_test_app.domain.models.Resource
 import com.example.recipes_test_app.presentation.viewmodels.MainViewModel
-import kotlin.collections.emptyList
 
 
 @Composable
@@ -58,11 +61,13 @@ fun RecipesScreen(onRecipeClick: (Int) -> Unit, viewModel: MainViewModel = hiltV
                     viewModel.searchRecipes(it)
                 }
             },
-            label = { Text("Поиск рецептов") },
+            label = { Text(stringResource(R.string.search_recipes_text)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
         )
+
+        CategorySelector(viewModel)
 
         if (searchQuery.isNotBlank()) {
             when (searchState) {
@@ -74,7 +79,14 @@ fun RecipesScreen(onRecipeClick: (Int) -> Unit, viewModel: MainViewModel = hiltV
                 is Resource.Error -> Box(
                     Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
-                ) { Text("Ошибка: ${searchState.message}", color = Color.Red) }
+                ) {
+                    searchState.message?.let {
+                        Text(
+                            stringResource(R.string.error_text, it),
+                            color = Color.Red
+                        )
+                    }
+                }
 
                 is Resource.Success -> {
                     LazyColumn(
@@ -99,7 +111,14 @@ fun RecipesScreen(onRecipeClick: (Int) -> Unit, viewModel: MainViewModel = hiltV
                 is Resource.Error -> Box(
                     Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
-                ) { Text("Ошибка: ${state.message}", color = Color.Red) }
+                ) {
+                    state.message?.let {
+                        Text(
+                            stringResource(R.string.error_text, it),
+                            color = Color.Red
+                        )
+                    }
+                }
 
                 is Resource.Success -> {
                     val recipes = state.data
@@ -139,8 +158,6 @@ fun RecipesScreen(onRecipeClick: (Int) -> Unit, viewModel: MainViewModel = hiltV
 }
 
 
-
-
 @Composable
 fun RecipeCard(
     recipe: Recipe,
@@ -178,11 +195,34 @@ fun RecipeCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = recipe.description ?: "Описание отсутствует",
+                    text = recipe.description,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun CategorySelector(
+    viewModel: MainViewModel
+) {
+    val selectedCategory by viewModel.selectedCategory
+
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        viewModel.categories.forEachIndexed { index, category ->
+            SegmentedButton(
+                modifier = Modifier.fillMaxWidth(),
+                shape = SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = viewModel.categories.size
+                ),
+                onClick = { viewModel.selectCategory(category) },
+                selected = category == selectedCategory
+            ) {
+                Text(category)
             }
         }
     }

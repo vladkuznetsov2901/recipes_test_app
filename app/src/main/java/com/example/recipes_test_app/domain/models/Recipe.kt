@@ -9,5 +9,6 @@ data class Recipe(
     @SerializedName("summary") val description: String,
     val instructions: String?,
     val readyInMinutes: Int?,
-    val servings: Int?
+    val servings: Int?,
+    val dishTypes: List<String>
 )

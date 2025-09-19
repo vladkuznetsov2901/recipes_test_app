@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,10 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.recipes_test_app.R
 import com.example.recipes_test_app.domain.models.Recipe
 import com.example.recipes_test_app.domain.models.Resource
 import com.example.recipes_test_app.presentation.viewmodels.MainViewModel
@@ -54,7 +55,7 @@ fun RecipeDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Рецепт") },
+                title = { Text(stringResource(R.string.recept_text)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
@@ -73,13 +74,15 @@ fun RecipeDetailsScreen(
                 is Resource.Loading -> {
                     CircularProgressIndicator()
                 }
+
                 is Resource.Success -> {
                     val recipe = (state as Resource.Success<Recipe>).data
                     RecipeDetailsContent(recipe)
                 }
+
                 is Resource.Error -> {
                     Text(
-                        text = (state as Resource.Error).message ?: "Ошибка загрузки",
+                        text = (state as Resource.Error).message ?: stringResource(R.string.error_loading),
                         color = Color.Red,
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -118,13 +121,13 @@ fun RecipeDetailsContent(recipe: Recipe) {
 
         Spacer(Modifier.height(8.dp))
 
-        Text("Готовится за: ${recipe.readyInMinutes} мин")
-        Text("Порций: ${recipe.servings}")
+        recipe.readyInMinutes?.let { Text(stringResource(R.string.coocking_time_text, it)) }
+        recipe.servings?.let { Text(stringResource(R.string.servings_text, it)) }
 
         Spacer(Modifier.height(16.dp))
 
         Text(
-            text = "Описание:",
+            text = stringResource(R.string.description_text),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -132,7 +135,7 @@ fun RecipeDetailsContent(recipe: Recipe) {
         Spacer(Modifier.height(4.dp))
 
         Text(
-            text = recipe.instructions ?: "Нет инструкции",
+            text = recipe.instructions ?: stringResource(R.string.no_instruction_text),
             style = MaterialTheme.typography.bodyLarge
         )
     }

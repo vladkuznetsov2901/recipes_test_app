@@ -1,34 +1,20 @@
 package com.example.recipes_test_app.presentation.viewmodels
 
-import android.content.Context
 import android.util.Log
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import com.example.recipes_test_app.domain.models.Recipe
 import com.example.recipes_test_app.domain.models.Resource
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import com.example.recipes_test_app.data.db.RecipeEntity
-import com.example.recipes_test_app.domain.usecases.GetCachedRecipesUseCase
 import com.example.recipes_test_app.domain.usecases.GetRandomRecipesUseCase
 import com.example.recipes_test_app.domain.usecases.GetRecipeByIdUseCase
-import com.example.recipes_test_app.domain.usecases.InsertRecipesCache
 import com.example.recipes_test_app.domain.usecases.SearchRecipesUseCase
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 @HiltViewModel
@@ -52,6 +38,9 @@ class MainViewModel @Inject constructor(
     private val _searchState = mutableStateOf<Resource<List<Recipe>>>(Resource.Loading())
     val searchState: State<Resource<List<Recipe>>> get() = _searchState
 
+    val categories = listOf("lunch", "main course", "main dish", "dinner")
+    private val _selectedCategory = mutableStateOf<String?>(null)
+    val selectedCategory: State<String?> get() = _selectedCategory
 
     init {
         loadMoreRecipes()
@@ -105,6 +94,16 @@ class MainViewModel @Inject constructor(
                 _searchState.value = Resource.Error(e.localizedMessage)
             }
         }
+    }
+
+    fun selectCategory(category: String?) {
+        _selectedCategory.value = category
+        val filtered = if (category == null) {
+            currentRecipes
+        } else {
+            currentRecipes.filter { it.dishTypes.contains(category) }
+        }
+        _recipesState.value = Resource.Success(filtered)
     }
 
 }

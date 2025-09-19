@@ -1,6 +1,5 @@
 package com.example.recipes_test_app.data.mappers
 
-import android.os.Build
 import android.text.Html
 import com.example.recipes_test_app.data.data.RecipeDTO
 import com.example.recipes_test_app.data.db.RecipeEntity
@@ -16,7 +15,8 @@ fun RecipeDTO.toDomain(): Recipe {
         description = summary.stripHtml(),
         instructions = instructions.stripHtml(),
         readyInMinutes = readyInMinutes,
-        servings = servings
+        servings = servings,
+        dishTypes = dishTypes
     )
 }
 
@@ -26,12 +26,13 @@ fun String.stripHtml(): String {
 
 fun RecipeDTO.toEntity(): RecipeEntity = RecipeEntity(
     id = id,
-    title = title ?: "Без названия",
+    title = title,
     imageUrl = image ?: "",
-    description = summary.stripHtml() ?: "",
-    instructions = instructions.stripHtml() ?: "",
-    readyInMinutes = readyInMinutes ?: 0,
-    servings = servings ?: 0
+    description = summary.stripHtml(),
+    instructions = instructions.stripHtml(),
+    readyInMinutes = readyInMinutes,
+    servings = servings,
+    dishTypes = dishTypes
 )
 
 
@@ -44,7 +45,8 @@ fun Recipe.toEntity(): RecipeEntity {
         description = description,
         instructions = instructions,
         readyInMinutes = readyInMinutes,
-        servings = servings
+        servings = servings,
+        dishTypes = dishTypes
     )
 }
 
@@ -53,10 +55,11 @@ fun RecipeEntity.toDomain(): Recipe {
     return Recipe(
         id = id,
         title = title,
-        imageUrl = imageUrl  ?: "",
+        imageUrl = imageUrl ?: "",
         description = description,
         instructions = instructions?.stripHtml(),
         readyInMinutes = readyInMinutes,
-        servings = servings
+        servings = servings,
+        dishTypes = dishTypes
     )
 }
