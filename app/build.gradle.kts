@@ -60,17 +60,24 @@ dependencies {
 
     //Paging
     implementation(libs.androidx.paging.runtime.ktx)
+    implementation(libs.androidx.paging.compose)
 
 
-    implementation(libs.androidx.room.rxjava2)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.paging)
 
 
     implementation (libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
     ksp (libs.hilt.compiler)
 
+    // coil
+    implementation(libs.coil.compose)
+
+
+    implementation(libs.accompanist.systemuicontroller)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

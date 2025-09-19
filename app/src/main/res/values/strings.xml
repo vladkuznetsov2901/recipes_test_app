@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">recipes_test_app</string>
+    <string name="error_message">Ошибка при загрузке данных! Проверьте подключение к интернет и попробуйте еще раз.</string>
+    <string name="recept_text">Рецепт</string>
+    <string name="error_loading">Ошибка загрузки</string>
+    <string name="coocking_time_text">Готовится за: %1$d мин</string>
+    <string name="servings_text">Порций: %1$d</string>
+    <string name="description_text">Описание:</string>
+    <string name="no_instruction_text">Нет инструкции</string>
+    <string name="search_recipes_text">Поиск рецептов</string>
+    <string name="error_text">Ошибка: %1$s</string>
 </resources>
